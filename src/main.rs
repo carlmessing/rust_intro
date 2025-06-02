@@ -22,7 +22,7 @@ async fn handle_notfound() -> Result<impl warp::Reply, Infallible> {
 
 #[tokio::main]
 async fn main() {
-    // Define endpoints
+    // health endpoint
     let health_get = warp::get()
         .and(warp::path!("health"))
         .and_then(endpoints::health::get);
@@ -30,7 +30,8 @@ async fn main() {
         .and(warp::path!("health"))
         .and(warp::body::json())
         .and_then(endpoints::health::post);
-
+    
+    // greet endpoint
     let greet_post = warp::post()
         .and(warp::path!("greet" / String))
         .and_then(endpoints::greet::post);
@@ -39,7 +40,8 @@ async fn main() {
         .and(warp::path::end())
         .and(warp::query::<QueryParams>())
         .and_then(endpoints::greet::get);
-
+    
+    // 404 endpoint
     let notfound = warp::any().and_then(handle_notfound);
     
     // Define routes
