@@ -28,6 +28,7 @@ async fn main() {
         .and_then(endpoints::health::get);
     let health_post = warp::post()
         .and(warp::path!("health"))
+        .and(warp::body::json())
         .and_then(endpoints::health::post);
 
     let greet_post = warp::post()

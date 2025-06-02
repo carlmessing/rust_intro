@@ -1,5 +1,5 @@
 use std::convert::Infallible;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize)]
 struct HealthResponseGET {
@@ -20,13 +20,21 @@ pub async fn get() -> Result<impl warp::Reply, Infallible> {
 
 #[derive(Serialize)]
 struct HealthResponsePOST {
-    result: String,
+    name: String,
+    age: i32
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct BodyPOST {
+    name: String,
+    age: i32
 }
 
 // health POST handler
-pub async fn post() -> Result<impl warp::Reply, Infallible> {
+pub async fn post(data: BodyPOST) -> Result<impl warp::Reply, Infallible> {
     let response = HealthResponsePOST {
-        result: "OK".to_string()+" POST",
+        name: data.name,
+        age: data.age
     };
 
     Ok(warp::reply::with_status(
