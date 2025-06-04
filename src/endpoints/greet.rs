@@ -1,14 +1,10 @@
 use std::convert::Infallible;
 use serde::{Deserialize, Serialize};
+use crate::handlers;
 
 #[derive(Deserialize)]
 pub struct QueryParams {
-    version: Option<String>,
-}
-
-#[derive(Serialize)]
-struct GreetResponseGET {
-    message: String,
+    pub(crate) version: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -16,8 +12,9 @@ struct GreetResponseGETerror {
     error: String,
 }
 
-// greet GET handler
+// greet GET endpoint
 pub async fn get(params: QueryParams) -> Result<impl warp::Reply, warp::Rejection> {
+    // validation
     if params.version.is_none() {
         return Ok(warp::reply::with_status(
             warp::reply::json(&GreetResponseGETerror {error: "missing argument".to_string()}), 
@@ -25,29 +22,13 @@ pub async fn get(params: QueryParams) -> Result<impl warp::Reply, warp::Rejectio
         );
     }
     
-    // business logic
-    let response = GreetResponseGET {
-        message: "Hello someone".to_string(),
-    };
-    
-    Ok(warp::reply::with_status(
-        warp::reply::json(&response),
-        warp::http::StatusCode::OK
-    ))
+    let response = handlers::greet::get(params);
+    Ok(warp::reply::with_status(response.body, response.status_code))
 }
 
-#[derive(Serialize)]
-struct GreetResponsePOST {
-    message: String,
-}
 
-// greet POST handler
+// greet POST endpoint
 pub async fn post(name: String) -> Result<impl warp::Reply, Infallible> {
-    let response = GreetResponsePOST {
-        message: format!("Hello, {}!", name),
-    };
-    Ok(warp::reply::with_status(
-        warp::reply::json(&response),
-        warp::http::StatusCode::OK
-    ))
+    let response = handlers::greet::post(name);
+    Ok(warp::reply::with_status(response.body, response.status_code))
 }

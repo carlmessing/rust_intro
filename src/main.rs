@@ -4,6 +4,7 @@ use std::convert::Infallible;
 use crate::endpoints::greet::QueryParams;
 
 mod endpoints;
+mod handlers;
 
 #[derive(Serialize)]
 struct ErrorResponse {

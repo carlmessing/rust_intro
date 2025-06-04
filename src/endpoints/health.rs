@@ -1,44 +1,21 @@
 use std::convert::Infallible;
 use serde::{Deserialize, Serialize};
+use crate::handlers;
 
-#[derive(Serialize)]
-struct HealthResponseGET {
-    status: String,
-}
-
-// health GET handler
+// health GET endpoint
 pub async fn get() -> Result<impl warp::Reply, Infallible> {
-    let response = HealthResponseGET {
-        status: "OK".to_string()+" GET",
-    };
-    
-    Ok(warp::reply::with_status(
-        warp::reply::json(&response),
-        warp::http::StatusCode::OK
-    ))
-}
-
-#[derive(Serialize)]
-struct HealthResponsePOST {
-    name: String,
-    age: i32
+    let response = handlers::health::get();
+    Ok(warp::reply::with_status(response.body, response.status_code))
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct BodyPOST {
-    name: String,
-    age: i32
+    pub name: String,
+    pub age: i32
 }
 
-// health POST handler
+// health POST endpoint
 pub async fn post(data: BodyPOST) -> Result<impl warp::Reply, Infallible> {
-    let response = HealthResponsePOST {
-        name: data.name,
-        age: data.age
-    };
-
-    Ok(warp::reply::with_status(
-        warp::reply::json(&response),
-        warp::http::StatusCode::OK
-    ))
+    let response = handlers::health::post(data);
+    Ok(warp::reply::with_status(response.body, response.status_code))
 }
