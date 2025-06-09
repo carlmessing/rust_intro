@@ -28,10 +28,10 @@ struct GreetResponsePOST {
 }
 
 // greet POST handler
-pub fn post(name: String) -> StatusResponse {
+pub fn post(name: String, body: serde_json::Value) -> StatusResponse {
     // business logic
     let response = GreetResponsePOST {
-        message: format!("Hello, {}!", name),
+        message: format!("Hello, {} aka {}!", name, body.get("description").unwrap()),
     };
     
     StatusResponse {

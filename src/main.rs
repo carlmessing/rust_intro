@@ -5,6 +5,7 @@ use crate::endpoints::greet::QueryParams;
 
 mod endpoints;
 mod handlers;
+mod utils;
 
 #[derive(Serialize)]
 struct ErrorResponse {
@@ -35,6 +36,7 @@ async fn main() {
     // greet endpoint
     let greet_post = warp::post()
         .and(warp::path!("greet" / String))
+        .and(warp::body::bytes())
         .and_then(endpoints::greet::post);
     let greet_get = warp::get()
         .and(warp::path!("greet"))
