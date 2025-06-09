@@ -1,5 +1,6 @@
 use serde::Serialize;
 use warp::http::StatusCode;
+use warp::hyper::Body;
 use warp::reply::json;
 use crate::endpoints::greet::QueryParams;
 use crate::handlers::StatusResponse;
@@ -28,10 +29,10 @@ struct GreetResponsePOST {
 }
 
 // greet POST handler
-pub fn post(name: String) -> StatusResponse {
+pub fn post(name: String, body: serde_json::Value) -> StatusResponse {
     // business logic
     let response = GreetResponsePOST {
-        message: format!("Hello, {}!", name),
+        message: format!("Hello, {} aka {}!", name, "from_body"),
     };
     
     StatusResponse {
