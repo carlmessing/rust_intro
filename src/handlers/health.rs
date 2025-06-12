@@ -9,13 +9,13 @@ struct HealthResponseGET {
 }
 
 // health GET handler
-pub fn get() -> WithStatus<Json> {
+pub fn get() -> Result<WithStatus<Json>, warp::Rejection> {
     // business logic
     let response = HealthResponseGET {
         status: "OK GET".to_string(),
     };
     
-    reply_ok(&response)
+    Ok(reply_ok(&response))
 }
 
 #[derive(Serialize)]
@@ -25,12 +25,12 @@ struct HealthResponsePOST {
 }
 
 // health POST handler
-pub fn post(data: BodyPOST) -> WithStatus<Json> {
+pub fn post(data: BodyPOST) -> Result<WithStatus<Json>, warp::Rejection> {
     // business logic
     let response = HealthResponsePOST {
         name: data.name,
         age: data.age
     };
 
-    reply_ok(&response)
+    Ok(reply_ok(&response))
 }

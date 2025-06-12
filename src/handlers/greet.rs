@@ -8,13 +8,13 @@ struct GreetResponseGET {
     message: i32,
 }
 
-pub fn get(params: greet::GetQueryParams) -> WithStatus<Json> {
+pub fn get(params: greet::GetQueryParams) -> Result<WithStatus<Json>, warp::Rejection> {
     // business logic
     let response = GreetResponseGET {
         message: params.version.unwrap(),
     };
 
-    reply_ok(&response)
+    Ok(reply_ok(&response))
 }
 
 #[derive(Serialize)]
@@ -23,11 +23,11 @@ struct GreetResponsePOST {
 }
 
 // greet POST handler
-pub fn post(name: String, body: serde_json::Value) -> WithStatus<Json> {
+pub fn post(name: String, body: serde_json::Value) -> Result<WithStatus<Json>, warp::Rejection> {
     // business logic
     let response = GreetResponsePOST {
         message: format!("Hello, {} aka {}!", name, body.get("description").unwrap()),
     };
 
-    reply_ok(&response)
+    Ok(reply_ok(&response))
 }

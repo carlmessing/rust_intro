@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use warp::hyper::body::Bytes;
 use warp::reject::InvalidQuery;
 use crate::handlers;
-use crate::handlers::{reply_invalid_parameters, reply_notfound};
+use crate::handlers::{reply_internal_error, reply_invalid_parameters, reply_notfound};
 
 #[derive(Deserialize)]
 pub struct GetQueryParams {
@@ -25,7 +25,10 @@ pub async fn get(params: GetQueryParams) -> Result<impl warp::Reply, warp::Rejec
         );
     }
     
-    Ok(handlers::greet::get(params))
+    match handlers::greet::get(params) {
+        Ok(x) => Ok(x),
+        Err(_) => Ok(reply_internal_error())
+    }
 }
 
 pub async fn recover_get(err: warp::Rejection) -> Result<impl warp::Reply, warp::Rejection> {
@@ -59,5 +62,8 @@ pub async fn post(name: String, body: Bytes) -> Result<impl warp::Reply, Infalli
         );
     }
 
-    Ok(handlers::greet::post(name, body))
+    match handlers::greet::post(name, body) {
+        Ok(x) => Ok(x),
+        Err(_) => Ok(reply_internal_error())
+    }
 }
