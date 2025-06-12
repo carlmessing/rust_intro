@@ -1,11 +1,9 @@
-use std::convert::Infallible;
 use serde::{Deserialize, Serialize};
 use crate::handlers;
 
 // health GET endpoint
-pub async fn get() -> Result<impl warp::Reply, Infallible> {
-    let response = handlers::health::get();
-    Ok(warp::reply::with_status(response.body, response.status_code))
+pub async fn get() -> Result<impl warp::Reply, warp::Rejection> {
+    Ok(handlers::health::get())
 }
 
 #[derive(Serialize, Deserialize)]
@@ -15,7 +13,6 @@ pub struct BodyPOST {
 }
 
 // health POST endpoint
-pub async fn post(data: BodyPOST) -> Result<impl warp::Reply, Infallible> {
-    let response = handlers::health::post(data);
-    Ok(warp::reply::with_status(response.body, response.status_code))
+pub async fn post(data: BodyPOST) -> Result<impl warp::Reply, warp::Rejection> {
+    Ok(handlers::health::post(data))
 }

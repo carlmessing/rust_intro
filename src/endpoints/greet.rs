@@ -1,11 +1,13 @@
 use std::convert::Infallible;
 use serde::{Deserialize, Serialize};
 use warp::hyper::body::Bytes;
+use warp::reject::InvalidQuery;
 use crate::handlers;
+use crate::handlers::{reply_invalid_parameters, reply_notfound};
 
 #[derive(Deserialize)]
-pub struct QueryParams {
-    pub(crate) version: Option<String>,
+pub struct GetQueryParams {
+    pub(crate) version: Option<i32>,
 }
 
 #[derive(Serialize)]
@@ -14,7 +16,7 @@ struct GreetResponseGETerror {
 }
 
 // greet GET endpoint
-pub async fn get(params: QueryParams) -> Result<impl warp::Reply, warp::Rejection> {
+pub async fn get(params: GetQueryParams) -> Result<impl warp::Reply, warp::Rejection> {
     // validation
     if params.version.is_none() {
         return Ok(warp::reply::with_status(
@@ -23,10 +25,13 @@ pub async fn get(params: QueryParams) -> Result<impl warp::Reply, warp::Rejectio
         );
     }
     
-    let response = handlers::greet::get(params);
-    Ok(warp::reply::with_status(response.body, response.status_code))
+    Ok(handlers::greet::get(params))
 }
 
+pub async fn recover_get(err: warp::Rejection) -> Result<impl warp::Reply, warp::Rejection> {
+    if let Some(_) = err.find::<InvalidQuery>() { return Ok(reply_invalid_parameters()) }
+    Ok(reply_notfound())
+}
 
 // greet POST endpoint
 pub async fn post(name: String, body: Bytes) -> Result<impl warp::Reply, Infallible> {
@@ -54,6 +59,5 @@ pub async fn post(name: String, body: Bytes) -> Result<impl warp::Reply, Infalli
         );
     }
 
-    let response = handlers::greet::post(name, body);
-    Ok(warp::reply::with_status(response.body, response.status_code))
+    Ok(handlers::greet::post(name, body))
 }

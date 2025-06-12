@@ -1,26 +1,13 @@
 use warp::Filter;
-use serde::{Serialize};
 use std::convert::Infallible;
-use crate::endpoints::greet::QueryParams;
+use crate::endpoints::greet;
+use crate::handlers::reply_notfound;
 
 mod endpoints;
 mod handlers;
 mod utils;
 
-#[derive(Serialize)]
-struct ErrorResponse {
-    error: String,
-}
-
-async fn handle_notfound() -> Result<impl warp::Reply, Infallible> {
-    let response = ErrorResponse {
-        error: "Not found".to_string()
-    };
-    Ok(warp::reply::with_status(
-        warp::reply::json(&response),
-        warp::http::StatusCode::NOT_FOUND
-    ))
-}
+async fn handle_notfound() -> Result<impl warp::Reply, Infallible> { Ok(reply_notfound()) }
 
 #[tokio::main]
 async fn main() {
@@ -41,8 +28,9 @@ async fn main() {
     let greet_get = warp::get()
         .and(warp::path!("greet"))
         .and(warp::path::end())
-        .and(warp::query::<QueryParams>())
-        .and_then(endpoints::greet::get);
+        .and(warp::query::<greet::GetQueryParams>())
+        .and_then(endpoints::greet::get)
+        .recover(endpoints::greet::recover_get);
     
     // 404 endpoint
     let notfound = warp::any().and_then(handle_notfound);
@@ -55,7 +43,10 @@ async fn main() {
         .or(notfound);
 
     // Start server
+    let ip = [127, 0, 0, 1];
+    let port = 3030;
+    println!("✅ Server is running on {}.{}.{}.{}:{}.", ip[0], ip[1], ip[2], ip[3], port);
     warp::serve(routes)
-        .run(([127, 0, 0, 1], 3030))
+        .run((ip, port))
         .await;
 }

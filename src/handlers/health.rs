@@ -1,8 +1,7 @@
 use serde::Serialize;
-use warp::reply::json;
+use warp::reply::{Json, WithStatus};
 use crate::endpoints::health::BodyPOST;
-use warp::http::StatusCode;
-use crate::handlers::StatusResponse;
+use crate::handlers::{reply_ok};
 
 #[derive(Serialize)]
 struct HealthResponseGET {
@@ -10,16 +9,13 @@ struct HealthResponseGET {
 }
 
 // health GET handler
-pub fn get() -> StatusResponse {
+pub fn get() -> WithStatus<Json> {
     // business logic
     let response = HealthResponseGET {
-        status: "OK".to_string()+" GET",
+        status: "OK GET".to_string(),
     };
     
-    StatusResponse {
-        body: json(&response), 
-        status_code: StatusCode::OK
-    }
+    reply_ok(&response)
 }
 
 #[derive(Serialize)]
@@ -29,15 +25,12 @@ struct HealthResponsePOST {
 }
 
 // health POST handler
-pub fn post(data: BodyPOST) -> StatusResponse {
+pub fn post(data: BodyPOST) -> WithStatus<Json> {
     // business logic
     let response = HealthResponsePOST {
         name: data.name,
         age: data.age
     };
-    
-    StatusResponse {
-        body: json(&response),
-        status_code: StatusCode::OK
-    }
+
+    reply_ok(&response)
 }
