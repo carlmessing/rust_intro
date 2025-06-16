@@ -3,11 +3,11 @@ use serde::{Deserialize, Serialize};
 use warp::hyper::body::Bytes;
 use warp::reject::InvalidQuery;
 use crate::handlers;
-use crate::handlers::{reply_internal_error, reply_invalid_parameters, reply_notfound};
+use crate::utils::{reply_internal_error, reply_invalid_body, reply_invalid_parameters, reply_missing_argument, reply_notfound};
 
 #[derive(Deserialize)]
 pub struct GetQueryParams {
-    pub(crate) version: Option<i32>,
+    pub(crate) version: i32,
 }
 
 #[derive(Serialize)]
@@ -17,14 +17,6 @@ struct GreetResponseGETerror {
 
 // greet GET endpoint
 pub async fn get(params: GetQueryParams) -> Result<impl warp::Reply, warp::Rejection> {
-    // validation
-    if params.version.is_none() {
-        return Ok(warp::reply::with_status(
-            warp::reply::json(&GreetResponseGETerror {error: "missing argument".to_string()}), 
-            warp::http::StatusCode::BAD_REQUEST)
-        );
-    }
-    
     match handlers::greet::get(params) {
         Ok(x) => Ok(x),
         Err(_) => Ok(reply_internal_error())
@@ -42,24 +34,18 @@ pub async fn post(name: String, body: Bytes) -> Result<impl warp::Reply, Infalli
     let body = match serde_json::from_slice::<serde_json::Value>(&body) {
         Ok(x) => x,
         Err(_) => {
-            return Ok(warp::reply::with_status(
-                warp::reply::json(&GreetResponseGETerror {error: "Invalid JSON in Body".to_string()}),
-                warp::http::StatusCode::BAD_REQUEST)
-            );
+            return Ok(reply_invalid_body());
         }
     };
     if let Err(e) = crate::utils::validator::validate_message_schema(
         std::path::Path::new("./src/schemas/greet_id_post_payload.json"),
         &body,
     ) {
-        println!(
-            "Failed to validate message schema: weather_alert\nOriginal message: {:#?}\nError: {}",
-            &body, e
-        );
-        return Ok(warp::reply::with_status(
-            warp::reply::json(&GreetResponseGETerror {error: "Invalid Body".to_string()}),
-            warp::http::StatusCode::BAD_REQUEST)
-        );
+        // println!(
+        //     "Failed to validate message schema: weather_alert\nOriginal message: {:#?}\nError: {}",
+        //     &body, e
+        // );
+        return Ok(reply_invalid_body());
     }
 
     match handlers::greet::post(name, body) {

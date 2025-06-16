@@ -1,7 +1,7 @@
 use serde::Serialize;
 use warp::reply::{Json, WithStatus};
 use crate::endpoints::greet;
-use crate::handlers::{reply_ok};
+use crate::utils::reply_ok;
 
 #[derive(Serialize)]
 struct GreetResponseGET {
@@ -11,7 +11,7 @@ struct GreetResponseGET {
 pub fn get(params: greet::GetQueryParams) -> Result<WithStatus<Json>, warp::Rejection> {
     // business logic
     let response = GreetResponseGET {
-        message: params.version.unwrap(),
+        message: params.version,
     };
 
     Ok(reply_ok(&response))

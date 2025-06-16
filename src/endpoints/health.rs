@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use crate::handlers;
-use crate::handlers::reply_internal_error;
+use crate::utils::reply_internal_error;
 
 // health GET endpoint
 pub async fn get() -> Result<impl warp::Reply, warp::Rejection> {

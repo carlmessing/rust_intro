@@ -1,7 +1,7 @@
 use serde::Serialize;
 use warp::reply::{Json, WithStatus};
 use crate::endpoints::health::BodyPOST;
-use crate::handlers::{reply_ok};
+use crate::utils::reply_ok;
 
 #[derive(Serialize)]
 struct HealthResponseGET {

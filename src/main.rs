@@ -1,13 +1,22 @@
-use warp::Filter;
+use crate::endpoints::greet;
 use std::convert::Infallible;
 use std::env;
 use std::net::{Ipv4Addr, SocketAddr};
-use crate::endpoints::greet;
-use crate::handlers::reply_notfound;
+use tracing_subscriber;
+use utils::reply_notfound;
+use warp::Filter;
 
 mod endpoints;
 mod handlers;
 mod utils;
+
+fn init_tracing() {
+    tracing_subscriber::fmt()
+        .with_target(true) // show which module logs come from
+        .with_thread_names(true) // show thread names (optional but useful)
+        .with_env_filter("info") // log level (can be overridden with RUST_LOG)
+        .init();
+}
 
 async fn handle_notfound() -> Result<impl warp::Reply, Infallible> { Ok(reply_notfound()) }
 
@@ -31,6 +40,9 @@ async fn env_port() -> u16 {
 
 #[tokio::main]
 async fn main() {
+    // init tracing
+    init_tracing();
+    
     // health endpoint
     let health_get = warp::get()
         .and(warp::path!("health"))
@@ -60,7 +72,8 @@ async fn main() {
         .or(health_post)
         .or(greet_get)
         .or(greet_post)
-        .or(notfound);
+        .or(notfound)
+        .with(warp::log("api"));
 
     // Start server
     let ip = env_ip().await;
