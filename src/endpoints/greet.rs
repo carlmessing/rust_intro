@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use warp::hyper::body::Bytes;
 use warp::reject::InvalidQuery;
 use crate::handlers;
-use crate::utils::{reply_internal_error, reply_invalid_body, reply_invalid_parameters, reply_missing_argument, reply_notfound};
+use crate::utils::{reply_internal_error, reply_invalid_body, reply_invalid_parameters, reply_notfound};
 
 #[derive(Deserialize)]
 pub struct GetQueryParams {
@@ -37,7 +37,7 @@ pub async fn post(name: String, body: Bytes) -> Result<impl warp::Reply, Infalli
             return Ok(reply_invalid_body());
         }
     };
-    if let Err(e) = crate::utils::validator::validate_message_schema(
+    if let Err(_) = crate::utils::validator::validate_message_schema(
         std::path::Path::new("./src/schemas/greet_id_post_payload.json"),
         &body,
     ) {
