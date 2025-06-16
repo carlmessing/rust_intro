@@ -12,7 +12,7 @@ mod utils;
 async fn handle_notfound() -> Result<impl warp::Reply, Infallible> { Ok(reply_notfound()) }
 
 async fn env_ip() -> [u8; 4] {
-    let ip_str = env::var("IP_ADDRESS").unwrap_or_else(|_| "127.0.0.1".to_string());
+    let ip_str = env::var("SERVER_IP").unwrap_or_else(|_| "127.0.0.1".to_string());
 
     let ip: Ipv4Addr = ip_str.parse().unwrap_or_else(|_| {
         Ipv4Addr::new(127, 0, 0, 1)
@@ -22,7 +22,7 @@ async fn env_ip() -> [u8; 4] {
 }
 
 async fn env_port() -> u16 {
-    let my_value: i32 = env::var("MY_INT")
+    let my_value: i32 = env::var("SERVER_PORT")
         .ok()
         .and_then(|val| val.parse::<i32>().ok())
         .unwrap_or(3030);
