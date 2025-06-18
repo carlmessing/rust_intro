@@ -1,18 +1,12 @@
 use std::convert::Infallible;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use warp::hyper::body::Bytes;
-use warp::reject::InvalidQuery;
 use crate::handlers;
-use crate::utils::{reply_internal_error, reply_invalid_body, reply_invalid_parameters, reply_notfound};
+use crate::utils::{reply_internal_error, reply_invalid_body};
 
 #[derive(Deserialize)]
 pub struct GetQueryParams {
     pub(crate) version: i32,
-}
-
-#[derive(Serialize)]
-struct GreetResponseGETerror {
-    error: String,
 }
 
 // greet GET endpoint
@@ -21,11 +15,6 @@ pub async fn get(params: GetQueryParams) -> Result<impl warp::Reply, warp::Rejec
         Ok(x) => Ok(x),
         Err(_) => Ok(reply_internal_error())
     }
-}
-
-pub async fn recover_get(err: warp::Rejection) -> Result<impl warp::Reply, warp::Rejection> {
-    if let Some(_) = err.find::<InvalidQuery>() { return Ok(reply_invalid_parameters()) }
-    Ok(reply_notfound())
 }
 
 // greet POST endpoint

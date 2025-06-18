@@ -1,4 +1,3 @@
-use crate::endpoints::greet;
 use std::convert::Infallible;
 use std::env;
 use std::net::{Ipv4Addr, SocketAddr};
@@ -13,7 +12,7 @@ mod utils;
 fn init_tracing() {
     tracing_subscriber::fmt()
         .with_target(true) // show which module logs come from
-        .with_thread_names(true) // show thread names (optional but useful)
+        .with_thread_names(true) // show thread names
         .with_env_filter("info") // log level (can be overridden with RUST_LOG)
         .init();
 }
@@ -22,27 +21,23 @@ async fn handle_notfound() -> Result<impl warp::Reply, Infallible> { Ok(reply_no
 
 async fn env_ip() -> [u8; 4] {
     let ip_str = env::var("SERVER_IP").unwrap_or_else(|_| "127.0.0.1".to_string());
-
-    let ip: Ipv4Addr = ip_str.parse().unwrap_or_else(|_| {
-        Ipv4Addr::new(127, 0, 0, 1)
-    });
-    // [ip.octets()[0] as i32, ip.octets()[1] as i32, ip.octets()[2] as i32, ip.octets()[3] as i32]
+    let ip: Ipv4Addr = ip_str.parse().unwrap_or_else(|_| { Ipv4Addr::new(127, 0, 0, 1) });
     ip.octets()
 }
 
 async fn env_port() -> u16 {
-    let my_value: i32 = env::var("SERVER_PORT")
+    let server_port: i32 = env::var("SERVER_PORT")
         .ok()
         .and_then(|val| val.parse::<i32>().ok())
         .unwrap_or(3030);
-    my_value as u16
+    server_port as u16
 }
 
 #[tokio::main]
 async fn main() {
     // init tracing
     init_tracing();
-    
+
     // health endpoint
     let health_get = warp::get()
         .and(warp::path!("health"))
@@ -51,6 +46,7 @@ async fn main() {
         .and(warp::path!("health"))
         .and(warp::body::json())
         .and_then(endpoints::health::post);
+    let health = health_post.or(health_get);
     
     // greet endpoint
     let greet_post = warp::post()
@@ -60,18 +56,16 @@ async fn main() {
     let greet_get = warp::get()
         .and(warp::path!("greet"))
         .and(warp::path::end())
-        .and(warp::query::<greet::GetQueryParams>())
-        .and_then(endpoints::greet::get)
-        .recover(endpoints::greet::recover_get);
-    
+        .and(warp::query::<endpoints::greet::GetQueryParams>())
+        .and_then(endpoints::greet::get);
+    let greet = greet_post.or(greet_get).recover(endpoints::recover_get);
+
     // 404 endpoint
     let notfound = warp::any().and_then(handle_notfound);
     
     // Define routes
-    let routes = health_get
-        .or(health_post)
-        .or(greet_get)
-        .or(greet_post)
+    let routes = greet
+        .or(health)
         .or(notfound)
         .with(warp::log("api"));
 

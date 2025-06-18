@@ -8,6 +8,7 @@ struct GreetResponseGET {
     message: i32,
 }
 
+// greet GET handler
 pub fn get(params: greet::GetQueryParams) -> Result<WithStatus<Json>, warp::Rejection> {
     // business logic
     let response = GreetResponseGET {
