@@ -95,7 +95,12 @@ async fn main() {
         .and(warp::path::end())
         .and_then(endpoints::health::readyz)
         .boxed();
-    let healthcheck = livez.or(readyz);
+    let infoz = warp::get()
+        .and(warp::path!("infoz" / String))
+        .and(warp::path::end())
+        .and_then(endpoints::health::infoz)
+        .boxed();
+    let healthcheck = livez.or(readyz).or(infoz);
     
     // Define routes
     let routes = add

@@ -132,6 +132,18 @@ paths:
           description: application is alive
         '500':
           description: application is not alive
+          
+  /infoz/{key}:
+    get:
+      operationId: retrieve_informationz
+      summary: get certain informations about application like the version
+      responses: 
+        '200':
+          description: information was found under the specified key
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InfoZ'
 
 components:
   schemas:
@@ -156,4 +168,10 @@ components:
       type: object
       properties:
         error:
+          type: string
+    
+    InfoZ:
+      type: object
+      properties:
+        key:
           type: string
