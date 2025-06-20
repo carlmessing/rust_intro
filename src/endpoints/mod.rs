@@ -17,6 +17,13 @@ pub(crate) struct JsonBodyError {
 impl reject::Reject for JsonBodyError {}
 
 pub async fn recover(err: warp::Rejection) -> Result<impl warp::Reply, warp::Rejection> {
+    if err.is_not_found() {
+        return Ok(warp::reply::with_status(
+            warp::reply::json(&json!({ "error": "Not found" })),
+            StatusCode::NOT_FOUND,
+        ));
+    }
+    
     if let Some(_) = err.find::<InvalidQuery>() {
         let json = warp::reply::json(&json!({
             "error": "invalid or missing query parameter(s)"
@@ -37,13 +44,6 @@ pub async fn recover(err: warp::Rejection) -> Result<impl warp::Reply, warp::Rej
             "error": "method not allowed"
         }));
         return Ok(warp::reply::with_status(json, StatusCode::BAD_REQUEST));
-    }
-
-    if err.is_not_found() {
-        return Ok(warp::reply::with_status(
-            warp::reply::json(&json!({ "error": "Not found" })),
-            StatusCode::NOT_FOUND,
-        ));
     }
 
     // fallback error

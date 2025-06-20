@@ -1,8 +1,6 @@
-use std::convert::Infallible;
 use std::env;
 use std::net::{Ipv4Addr, SocketAddr};
 use tracing_subscriber;
-use utils::reply_notfound;
 use warp::Filter;
 use crate::utils::validator::json_body;
 
@@ -18,8 +16,6 @@ fn init_tracing() {
         .with_env_filter("info") // log level (can be overridden with RUST_LOG)
         .init();
 }
-
-async fn handle_notfound() -> Result<impl warp::Reply, Infallible> { Ok(reply_notfound()) }
 
 fn env_ip() -> [u8; 4] {
     let ip_str = env::var("SERVER_IP").unwrap_or_else(|_| "127.0.0.1".to_string());
@@ -45,7 +41,8 @@ async fn main() {
         .and(warp::path!("add"))
         .and(warp::path::end())
         .and(warp::query::<endpoints::add::GetQueryParams>())
-        .and_then(endpoints::add::get);
+        .and_then(endpoints::add::get)
+        .boxed();
     let add = add_get;
     
     // subtract endpoint
@@ -53,15 +50,17 @@ async fn main() {
         .and(warp::path!("subtract"))
         .and(warp::path::end())
         .and(warp::query::<endpoints::subtract::GetQueryParams>())
-        .and_then(endpoints::subtract::get);
+        .and_then(endpoints::subtract::get)
+        .boxed();
     let subtract = subtract_get;
     
     // multiply endpoint
     let multiply_post = warp::post()
-        .and(warp::path!("mulitply"))
+        .and(warp::path!("multiply"))
         .and(warp::path::end())
         .and(json_body::<schemas::multiply::MultiplyBodyPOST>())
-        .and_then(endpoints::multiply::post);
+        .and_then(endpoints::multiply::post)
+        .boxed();
     let multiply = multiply_post;
     
     // divide endpoint
@@ -69,25 +68,26 @@ async fn main() {
         .and(warp::path!("divide"))
         .and(warp::path::end())
         .and(json_body::<schemas::divide::DivideBodyPOST>())
-        .and_then(endpoints::divide::post);
+        .and_then(endpoints::divide::post)
+        .boxed();
     let divide = divide_post;
     
     // square endpoint
     let square_get = warp::get()
         .and(warp::path!("square" / i32))
-        .and_then(endpoints::square::get);
+        .and(warp::path::end())
+        .and_then(endpoints::square::get)
+        .boxed();
     let square = square_get;
-
-    // 404 endpoint
-    let notfound = warp::any().and_then(handle_notfound);
     
     // Define routes
     let routes = add
         .or(subtract)
         .or(multiply)
         .or(divide)
-        .or(square).recover(endpoints::recover)
-        .or(notfound)
+        .or(square)
+        .boxed()
+        .recover(endpoints::recover)
         .with(warp::log("api"));
 
     // Start server
