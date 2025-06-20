@@ -4,10 +4,12 @@ use std::net::{Ipv4Addr, SocketAddr};
 use tracing_subscriber;
 use utils::reply_notfound;
 use warp::Filter;
+use crate::utils::validator::json_body;
 
 mod endpoints;
 mod handlers;
 mod utils;
+mod schemas;
 
 fn init_tracing() {
     tracing_subscriber::fmt()
@@ -19,13 +21,13 @@ fn init_tracing() {
 
 async fn handle_notfound() -> Result<impl warp::Reply, Infallible> { Ok(reply_notfound()) }
 
-async fn env_ip() -> [u8; 4] {
+fn env_ip() -> [u8; 4] {
     let ip_str = env::var("SERVER_IP").unwrap_or_else(|_| "127.0.0.1".to_string());
     let ip: Ipv4Addr = ip_str.parse().unwrap_or_else(|_| { Ipv4Addr::new(127, 0, 0, 1) });
     ip.octets()
 }
 
-async fn env_port() -> u16 {
+fn env_port() -> u16 {
     let server_port: i32 = env::var("SERVER_PORT")
         .ok()
         .and_then(|val| val.parse::<i32>().ok())
@@ -37,41 +39,60 @@ async fn env_port() -> u16 {
 async fn main() {
     // init tracing
     init_tracing();
-
-    // health endpoint
-    let health_get = warp::get()
-        .and(warp::path!("health"))
-        .and_then(endpoints::health::get);
-    let health_post = warp::post()
-        .and(warp::path!("health"))
-        .and(warp::body::json())
-        .and_then(endpoints::health::post);
-    let health = health_post.or(health_get);
     
-    // greet endpoint
-    let greet_post = warp::post()
-        .and(warp::path!("greet" / String))
-        .and(warp::body::bytes())
-        .and_then(endpoints::greet::post);
-    let greet_get = warp::get()
-        .and(warp::path!("greet"))
+    // add endpoint
+    let add_get = warp::get()
+        .and(warp::path!("add"))
         .and(warp::path::end())
-        .and(warp::query::<endpoints::greet::GetQueryParams>())
-        .and_then(endpoints::greet::get);
-    let greet = greet_post.or(greet_get).recover(endpoints::recover_get);
+        .and(warp::query::<endpoints::add::GetQueryParams>())
+        .and_then(endpoints::add::get);
+    let add = add_get;
+    
+    // subtract endpoint
+    let subtract_get = warp::get()
+        .and(warp::path!("subtract"))
+        .and(warp::path::end())
+        .and(warp::query::<endpoints::subtract::GetQueryParams>())
+        .and_then(endpoints::subtract::get);
+    let subtract = subtract_get;
+    
+    // multiply endpoint
+    let multiply_post = warp::post()
+        .and(warp::path!("mulitply"))
+        .and(warp::path::end())
+        .and(json_body::<schemas::multiply::MultiplyBodyPOST>())
+        .and_then(endpoints::multiply::post);
+    let multiply = multiply_post;
+    
+    // divide endpoint
+    let divide_post = warp::post()
+        .and(warp::path!("divide"))
+        .and(warp::path::end())
+        .and(json_body::<schemas::divide::DivideBodyPOST>())
+        .and_then(endpoints::divide::post);
+    let divide = divide_post;
+    
+    // square endpoint
+    let square_get = warp::get()
+        .and(warp::path!("square" / i32))
+        .and_then(endpoints::square::get);
+    let square = square_get;
 
     // 404 endpoint
     let notfound = warp::any().and_then(handle_notfound);
     
     // Define routes
-    let routes = greet
-        .or(health)
+    let routes = add
+        .or(subtract)
+        .or(multiply)
+        .or(divide)
+        .or(square).recover(endpoints::recover)
         .or(notfound)
         .with(warp::log("api"));
 
     // Start server
-    let ip = env_ip().await;
-    let port = env_port().await;
+    let ip = env_ip();
+    let port = env_port();
     println!("✅ Server is running on {}.{}.{}.{}:{}.", ip[0], ip[1], ip[2], ip[3], port);
     warp::serve(routes)
         .run(SocketAddr::from((ip, port)))

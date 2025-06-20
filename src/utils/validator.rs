@@ -1,40 +1,19 @@
-use jsonschema;
+use bytes::Bytes;
+use serde::de::DeserializeOwned;
+use warp::{Filter, Rejection};
+use crate::endpoints;
 
-pub fn validate_message_schema(
-    validator_path: &std::path::Path,
-    instance: &serde_json::Value,
-) -> Result<(), String> {
-    /*
-    match std::env::var("SCHEMA_VALIDATION_ENABLED") {
-        Ok(enabled) => {
-            if enabled == "false" {
-                return Ok(());
-            }
+pub fn json_body<T>() -> impl Filter<Extract = (T,), Error = Rejection> + Clone
+where
+    T: DeserializeOwned + Send + 'static,
+{
+    warp::body::bytes().and_then(|body: Bytes| async move {
+        let res: Result<T, serde_json::Error> = serde_json::from_slice(&body);
+        match res {
+            Ok(data) => Ok(data),
+            Err(e) => Err(warp::reject::custom(endpoints::JsonBodyError {
+                message: e.to_string(),
+            })),
         }
-        Err(_) => return Ok(()),
-    };
-
-     */
-    // read json schema file as json value
-    let schema_source = match std::fs::read(validator_path) {
-        Ok(schema) => schema,
-        Err(_) => {
-            return Err("❌ Failed to read schema file in path ".to_string()
-                + validator_path.to_str().unwrap());
-        }
-    };
-    let schema = match serde_json::from_slice::<serde_json::Value>(&schema_source) {
-        Ok(schema) => schema,
-        Err(_) => {
-            return Err("❌ Failed to parse schema file in path ".to_string()
-                + validator_path.to_str().unwrap());
-        }
-    };
-    let result = jsonschema::validate(&schema, instance);
-    if let Err(error) = result {
-        Err("❌ Message payload invalid!, errors: ".to_string()
-            + &error.to_string())
-    } else {
-        Ok(())
-    }
+    })
 }

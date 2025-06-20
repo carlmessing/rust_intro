@@ -1,0 +1,134 @@
+openapi: 3.0.3
+info:
+  title: Calculator API
+  version: 1.0.0
+  description: A simple calculator with basic arithmetic operations.
+servers:
+  - url: http://localhost:3030
+
+paths:
+  /add:
+    get:
+      summary: Add two numbers
+      parameters:
+        - name: a
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: b
+          in: query
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Sum of a and b
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+
+  /subtract:
+    get:
+      summary: Subtract b from a
+      parameters:
+        - name: a
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: b
+          in: query
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Result of a - b
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+
+  /multiply:
+    post:
+      summary: Multiply two numbers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Operands'
+      responses:
+        '200':
+          description: Product of a and b
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+
+  /divide:
+    post:
+      summary: Divide a by b
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Operands'
+      responses:
+        '200':
+          description: Result of a / b
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+        '400':
+          description: Division by zero error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /square/{n}:
+    get:
+      summary: Square a number
+      parameters:
+        - name: n
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Result of n squared
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Result'
+
+components:
+  schemas:
+    Operands:
+      type: object
+      required:
+        - a
+        - b
+      properties:
+        a:
+          type: number
+        b:
+          type: number
+
+    Result:
+      type: object
+      properties:
+        result:
+          type: number
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
