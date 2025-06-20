@@ -9,6 +9,7 @@ servers:
 paths:
   /add:
     get:
+      operationId: adder
       summary: Add two numbers
       parameters:
         - name: a
@@ -31,6 +32,7 @@ paths:
 
   /subtract:
     get:
+      operationId: substractor
       summary: Subtract b from a
       parameters:
         - name: a
@@ -53,6 +55,7 @@ paths:
 
   /multiply:
     post:
+      operationId: multiplier
       summary: Multiply two numbers
       requestBody:
         required: true
@@ -70,6 +73,7 @@ paths:
 
   /divide:
     post:
+      operationId: divider
       summary: Divide a by b
       requestBody:
         required: true
@@ -93,6 +97,7 @@ paths:
 
   /square/{n}:
     get:
+      operationId: squarer
       summary: Square a number
       parameters:
         - name: n
