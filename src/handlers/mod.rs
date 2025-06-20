@@ -1,6 +1,6 @@
-pub(crate) mod add;
-pub(crate) mod subtract;
-pub(crate) mod multiply;
-pub(crate) mod divide;
-pub(crate) mod square;
+pub(crate) mod adder;
+pub(crate) mod subtractor;
+pub(crate) mod multiplier;
+pub(crate) mod divider;
+pub(crate) mod squarer;
 pub(crate) mod health;

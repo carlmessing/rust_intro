@@ -32,7 +32,7 @@ paths:
 
   /subtract:
     get:
-      operationId: substractor
+      operationId: subtractor
       summary: Subtract b from a
       parameters:
         - name: a

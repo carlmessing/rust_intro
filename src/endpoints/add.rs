@@ -1,3 +1,4 @@
+use std::panic;
 use serde::Deserialize;
 use crate::handlers;
 use crate::utils::reply_internal_error;
@@ -8,10 +9,12 @@ pub struct GetQueryParams {
     pub(crate) b: i32
 }
 
-/// add GET endpoint
+/// `[GET] /multiply` endpoint,
+/// replies `500 Internal Server Error` if handler panicks
 pub async fn get(params: GetQueryParams) -> Result<impl warp::Reply, warp::Rejection>{
-    match handlers::add::get(params) {
-        Ok(x) => Ok(x),
+    let result = panic::catch_unwind(|| {handlers::adder::handler(params)});
+    match result {
+        Ok(x) => x,
         Err(_) => Ok(reply_internal_error())
     }
 }

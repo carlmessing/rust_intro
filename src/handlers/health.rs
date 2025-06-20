@@ -1,4 +1,4 @@
-/// handler for kubernetes (health check) readyz endpoint,
+/// This function handles kubernetes (health check) readyz requests on GET /healthcheck/readyz,
 /// returns true if application is ready, false otherwise
 pub(crate) fn readyz() -> bool {
     let ready_status = true;
@@ -6,7 +6,7 @@ pub(crate) fn readyz() -> bool {
     ready_status
 }
 
-/// handler for kubernetes (health check) livez endpoint,
+/// This function handles kubernetes (health check) livez requests on GET /healthcheck/livez,
 /// returns true if application is alive, false otherwise
 pub(crate) fn livez() -> bool {
     let live_status = true;
