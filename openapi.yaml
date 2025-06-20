@@ -113,6 +113,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/Result'
 
+  /healthcheck/readyz:
+    get:
+      operationId: kubernetes_readyz
+      summary: returns information about the ready state of the application
+      responses:
+        '200':
+          description: application is ready
+        '500':
+          description: application is not ready
+
+  /healthcheck/livez:
+    get:
+      operationId: kubernetes_livez
+      summary: returns information about the alive state of the application
+      responses:
+        '200':
+          description: application is alive
+        '500':
+          description: application is not alive
+
 components:
   schemas:
     Operands:

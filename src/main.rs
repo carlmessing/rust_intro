@@ -1,6 +1,7 @@
 use std::env;
 use std::net::{Ipv4Addr, SocketAddr};
 use tracing_subscriber;
+use tracing_subscriber::filter::FilterExt;
 use warp::Filter;
 use crate::utils::validator::json_body;
 
@@ -80,12 +81,26 @@ async fn main() {
         .boxed();
     let square = square_get;
     
+    // kubernetes health check endpoints
+    let livez = warp::get()
+        .and(warp::path!("healthcheck" / "livez"))
+        .and(warp::path::end())
+        .and_then(endpoints::health::livez)
+        .boxed();
+    let readyz = warp::get()
+        .and(warp::path!("healthcheck" / "readyz"))
+        .and(warp::path::end())
+        .and_then(endpoints::health::readyz)
+        .boxed();
+    let healthcheck = livez.or(readyz);
+    
     // Define routes
     let routes = add
         .or(subtract)
         .or(multiply)
         .or(divide)
         .or(square)
+        .or(healthcheck)
         .boxed()
         .recover(endpoints::recover)
         .with(warp::log("api"));
