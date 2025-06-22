@@ -1,5 +1,7 @@
 use std::env;
 use std::net::{Ipv4Addr, SocketAddr};
+use tracing::{info, warn, error, debug, info_span};
+use tracing::Instrument;
 use tracing_subscriber;
 use warp::Filter;
 use crate::utils::validator::json_body;
@@ -109,14 +111,20 @@ async fn main() {
         .or(divide)
         .or(square)
         .or(healthcheck)
-        .boxed()
         .recover(endpoints::recover)
-        .with(warp::log("api"));
+        .with(warp::log("api"))
+        .boxed();
 
     // Start server
     let ip = env_ip();
     let port = env_port();
-    println!("✅ Server is running on {}.{}.{}.{}:{}.", ip[0], ip[1], ip[2], ip[3], port);
+    //replacing println with tracing::info
+    //println!("✅ Server is running on {}.{}.{}.{}:{}.", ip[0], ip[1], ip[2], ip[3], port);
+    tracing::info!(
+        ip = %format!("{}.{}.{}.{}", ip[0], ip[1], ip[2], ip[3]),
+        port = port,
+        "✅ Server is running"
+    );
     warp::serve(routes)
         .run(SocketAddr::from((ip, port)))
         .await;
