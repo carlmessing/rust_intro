@@ -2,6 +2,7 @@ use warp::reply::json;
 use warp::http::StatusCode;
 use warp::reply::{Json, WithStatus};
 use crate::schemas::multiply::MultiplyBodyPOST;
+use tracing::info;
 
 /// This function implements the business logic of the operation *multiplier*.
 /// It is called by requests to ```/multiply``` with method ``POST``.
@@ -9,6 +10,8 @@ use crate::schemas::multiply::MultiplyBodyPOST;
 pub fn handler(body: MultiplyBodyPOST) -> Result<WithStatus<Json>, warp::Rejection> {
     // business logic
     let result = body.a * body.b;
+    info!(a = body.a, b = body.b, result, "Executed multiplier logic");
+
     Ok(warp::reply::with_status(
         json(&serde_json::json!({"result": result})),
         StatusCode::OK
