@@ -1,5 +1,5 @@
-use std::env;
 use std::net::{Ipv4Addr, SocketAddr};
+use dotenv::dotenv;
 use tracing_subscriber;
 use warp::Filter;
 use crate::utils::validator::json_body;
@@ -20,7 +20,7 @@ fn init_tracing() {
 /// retrieves the IP-Adress as a quadruple of the server from the `.env` file.
 /// Defaults to [127.0.0.1](http://127.0.0.1) (localhost/loopback) if not set.
 fn env_ip() -> [u8; 4] {
-    let ip_str = env::var("SERVER_IP").unwrap_or_else(|_| "127.0.0.1".to_string());
+    let ip_str = std::env::var("SERVER_IP").unwrap_or_else(|_| "127.0.0.1".to_string());
     let ip: Ipv4Addr = ip_str.parse().unwrap_or_else(|_| { Ipv4Addr::new(127, 0, 0, 1) });
     ip.octets()
 }
@@ -28,7 +28,7 @@ fn env_ip() -> [u8; 4] {
 /// retrieves the IP-Adress as a quadruple of the server from the `.env` file.
 /// Defaults to `3030` (default warp port) if not set.
 fn env_port() -> u16 {
-    let server_port: i32 = env::var("SERVER_PORT")
+    let server_port: i32 = std::env::var("SERVER_PORT")
         .ok()
         .and_then(|val| val.parse::<i32>().ok())
         .unwrap_or(3030);
@@ -114,6 +114,7 @@ async fn main() {
         .with(warp::log("api"));
 
     // Start server
+    dotenv().ok();
     let ip = env_ip();
     let port = env_port();
     println!("✅ Server is running on {}.{}.{}.{}:{}.", ip[0], ip[1], ip[2], ip[3], port);
