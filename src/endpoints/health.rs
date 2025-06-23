@@ -35,7 +35,7 @@ pub(crate) async fn livez() -> Result<impl warp::Reply, warp::Rejection> {
     }
 }
 
-/// infoz endpoint for retriving certain informations about the application
+/// infoz endpoint for retrieving certain information about the application
 pub(crate) async fn infoz(key: String) -> Result<impl warp::Reply, warp::Rejection> {
     let info = match handlers::health::infoz(&key) { 
         None => ("No information available".to_string(), StatusCode::NOT_FOUND),
