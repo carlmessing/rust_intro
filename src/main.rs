@@ -41,69 +41,70 @@ async fn main() {
     init_tracing();
     
     // add endpoint
-    let add_get = warp::get()
-        .and(warp::path!("add"))
+    let add_get = warp::path!("add")
         .and(warp::path::end())
+        .and(warp::get())
         .and(warp::query::<endpoints::add::GetQueryParams>())
         .and_then(endpoints::add::get)
         .boxed();
     let add = add_get;
     
     // subtract endpoint
-    let subtract_get = warp::get()
-        .and(warp::path!("subtract"))
+    let subtract_get = warp::path!("subtract")
         .and(warp::path::end())
+        .and(warp::get())
         .and(warp::query::<endpoints::subtract::GetQueryParams>())
         .and_then(endpoints::subtract::get)
         .boxed();
     let subtract = subtract_get;
     
     // multiply endpoint
-    let multiply_post = warp::post()
-        .and(warp::path!("multiply"))
+    let multiply_post = warp::path!("multiply")
         .and(warp::path::end())
+        .and(warp::post())
         .and(json_body::<schemas::multiply::MultiplyBodyPOST>())
         .and_then(endpoints::multiply::post)
         .boxed();
     let multiply = multiply_post;
     
     // divide endpoint
-    let divide_post = warp::post()
-        .and(warp::path!("divide"))
+    let divide_post = warp::path!("divide")
         .and(warp::path::end())
+        .and(warp::post())
         .and(json_body::<schemas::divide::DivideBodyPOST>())
         .and_then(endpoints::divide::post)
         .boxed();
     let divide = divide_post;
     
     // square endpoint
-    let square_get = warp::get()
-        .and(warp::path!("square" / i32))
+    let square_get = warp::path!("square" / i32)
         .and(warp::path::end())
+        .and(warp::get())
         .and_then(endpoints::square::get)
         .boxed();
     let square = square_get;
     
     // kubernetes health check endpoints
-    let livez = warp::get()
-        .and(warp::path!("healthcheck" / "livez"))
+    let livez = warp::path!("healthcheck" / "livez")
         .and(warp::path::end())
+        .and(warp::get())
         .and_then(endpoints::health::livez)
         .boxed();
-    let readyz = warp::get()
-        .and(warp::path!("healthcheck" / "readyz"))
+    let readyz = warp::path!("healthcheck" / "readyz")
         .and(warp::path::end())
+        .and(warp::get())
         .and_then(endpoints::health::readyz)
         .boxed();
-    let infoz = warp::get()
-        .and(warp::path!("infoz" / String))
+    let infoz = warp::path!("infoz" / String)
         .and(warp::path::end())
+        .and(warp::get())
         .and_then(endpoints::health::infoz)
         .boxed();
     let healthcheck = livez.or(readyz).or(infoz);
-    
+    let none = warp::get().and(warp::post()).map(|| "This should not happen at any time");
     // Define routes
-    let routes = add
+    let routes = none
+        .or(add)
         .or(subtract)
         .or(multiply)
         .or(divide)
