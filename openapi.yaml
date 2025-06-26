@@ -173,5 +173,9 @@ components:
     InfoZ:
       type: object
       properties:
-        key:
+        title:
+          type: string
+        version:
+          type: string
+        description:
           type: string

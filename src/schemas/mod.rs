@@ -1,2 +1,2 @@
-pub(crate) mod multiply;
-pub(crate) mod divide;
+pub(crate) mod component_types;
+pub(crate) mod custom_errors;

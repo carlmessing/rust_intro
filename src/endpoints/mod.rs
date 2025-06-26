@@ -2,6 +2,7 @@ use serde_json::json;
 use warp::http::StatusCode;
 use warp::reject;
 use warp::reject::{InvalidQuery, MethodNotAllowed};
+use crate::utils::{reply_forbidden_method, reply_invalid_parameters, reply_notfound};
 
 pub(crate) mod add;
 pub(crate) mod subtract;
@@ -19,17 +20,11 @@ impl reject::Reject for JsonBodyError {}
 
 pub async fn recover(err: warp::Rejection) -> Result<impl warp::Reply, warp::Rejection> {
     if err.is_not_found() {
-        return Ok(warp::reply::with_status(
-            warp::reply::json(&json!({ "error": "Not found" })),
-            StatusCode::NOT_FOUND,
-        ));
+        return Ok(reply_notfound());
     }
     
     if let Some(_) = err.find::<InvalidQuery>() {
-        let json = warp::reply::json(&json!({
-            "error": "invalid or missing query parameter(s)"
-        }));
-        return Ok(warp::reply::with_status(json, StatusCode::BAD_REQUEST));
+        return Ok(reply_invalid_parameters());
     }
     
     if let Some(e) = err.find::<JsonBodyError>() {
@@ -41,10 +36,7 @@ pub async fn recover(err: warp::Rejection) -> Result<impl warp::Reply, warp::Rej
     }
 
     if let Some(_) = err.find::<MethodNotAllowed>() {
-        let json = warp::reply::json(&json!({
-            "error": "method not allowed"
-        }));
-        return Ok(warp::reply::with_status(json, StatusCode::BAD_REQUEST));
+        return Ok(reply_forbidden_method());
     }
 
     // fallback error

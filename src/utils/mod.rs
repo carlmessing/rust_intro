@@ -20,12 +20,12 @@ pub fn reply_invalid_parameters() -> WithStatus<Json> {
     )
 }
 
-pub fn reply_invalid_body() -> WithStatus<Json> {
-    error!("invalid body");
+pub fn reply_forbidden_method() -> WithStatus<Json> {
+    error!("method not allowed");
     warp::reply::with_status(
-        json(&serde_json::json!({"error": "invalid body"})),
-        StatusCode::BAD_REQUEST)
-
+        json(&serde_json::json!({"error": "method not allowed"})),
+        StatusCode::BAD_REQUEST
+    )
 }
 
 pub fn reply_notfound() -> WithStatus<Json> {

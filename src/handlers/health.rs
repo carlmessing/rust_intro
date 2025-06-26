@@ -1,3 +1,5 @@
+use crate::schemas::component_types::InfoZ;
+
 /// This function handles kubernetes (health check) readyz requests on GET /healthcheck/readyz,
 /// returns true if application is ready, false otherwise
 pub(crate) fn readyz() -> bool {
@@ -15,11 +17,11 @@ pub(crate) fn livez() -> bool {
 }
 
 /// This function handles requests for information about the application.
-/// It should return the information as `String` for the requested key or otherwise, `None`.
-pub(crate) fn infoz(key: &String) -> Option<String> {
-    match key.as_str() { 
-        "version" => Some("1.0.0".to_string()),
-        "openapi-version" => Some("3.0.3".to_string()),
-        _ => None
+/// It should return the information as `String` per key.
+pub(crate) fn infoz() -> InfoZ {
+    InfoZ {
+        title: "Calculator API".to_string(),
+        version: "1.0.0".to_string(),
+        description: "A simple calculator with basic arithmetic operations.".to_string()
     }
 }

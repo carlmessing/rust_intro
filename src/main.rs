@@ -62,7 +62,7 @@ async fn main() {
     let multiply_post = warp::path!("multiply")
         .and(warp::path::end())
         .and(warp::post())
-        .and(json_body::<schemas::multiply::MultiplyBodyPOST>())
+        .and(json_body::<schemas::component_types::Operands>())
         .and_then(endpoints::multiply::post)
         .boxed();
     let multiply = multiply_post;
@@ -71,7 +71,7 @@ async fn main() {
     let divide_post = warp::path!("divide")
         .and(warp::path::end())
         .and(warp::post())
-        .and(json_body::<schemas::divide::DivideBodyPOST>())
+        .and(json_body::<schemas::component_types::Operands>())
         .and_then(endpoints::divide::post)
         .boxed();
     let divide = divide_post;
@@ -101,7 +101,7 @@ async fn main() {
         .and_then(endpoints::health::infoz)
         .boxed();
     let healthcheck = livez.or(readyz).or(infoz);
-    let none = warp::get().and(warp::post()).map(|| "This should not happen at any time");
+    let none = warp::path!("this exists only because this allows us to be lazy with the gtmpl templates").and(warp::any()).map(|| "This should not happen at any time");
     // Define routes
     let routes = none
         .or(add)

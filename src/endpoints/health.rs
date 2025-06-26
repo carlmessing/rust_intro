@@ -1,4 +1,3 @@
-use serde_json::json;
 use warp::http::StatusCode;
 use warp::reply::json;
 use crate::handlers;
@@ -37,14 +36,8 @@ pub(crate) async fn livez() -> Result<impl warp::Reply, warp::Rejection> {
 
 /// infoz endpoint for retrieving certain information about the application
 pub(crate) async fn infoz() -> Result<impl warp::Reply, warp::Rejection> {
-    let info = json!({
-        "title": "Calculator API",
-        "version": "1.0.0",
-        "description": "A simple calculator with basic arithmetic operations.",
-    });
-    
     Ok(warp::reply::with_status(
-        json(&info),
+        json(&handlers::health::infoz()),
         StatusCode::OK
     ))
 }
