@@ -95,7 +95,7 @@ async fn main() {
         .and(warp::get())
         .and_then(endpoints::health::readyz)
         .boxed();
-    let infoz = warp::path!("infoz" / String)
+    let infoz = warp::path!("infoz")
         .and(warp::path::end())
         .and(warp::get())
         .and_then(endpoints::health::infoz)
