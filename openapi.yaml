@@ -16,12 +16,12 @@ paths:
           in: query
           required: true
           schema:
-            type: number
+            type: integer
         - name: b
           in: query
           required: true
           schema:
-            type: number
+            type: integer
       responses:
         '200':
           description: Sum of a and b
@@ -39,12 +39,12 @@ paths:
           in: query
           required: true
           schema:
-            type: number
+            type: integer
         - name: b
           in: query
           required: true
           schema:
-            type: number
+            type: integer
       responses:
         '200':
           description: Result of a - b
@@ -104,7 +104,7 @@ paths:
           in: path
           required: true
           schema:
-            type: number
+            type: integer
       responses:
         '200':
           description: Result of n squared

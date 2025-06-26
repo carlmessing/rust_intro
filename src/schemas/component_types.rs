@@ -2,13 +2,13 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct Operands {
-    pub a: i32,
-    pub b: i32
+    pub a: f64,
+    pub b: f64
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Result {
-    pub result: i32
+    pub result: f64
 }
 
 #[derive(Serialize, Deserialize)]
