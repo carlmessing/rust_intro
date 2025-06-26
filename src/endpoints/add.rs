@@ -15,7 +15,7 @@ pub struct GetQueryParams {
 pub async fn get(params: GetQueryParams) -> Result<impl warp::Reply, warp::Rejection>{
     let result = panic::catch_unwind(|| {handlers::adder::handler(params)});
     match result {
-        Ok(ReturnValue::SumOfAAndB(x)) => Ok(reply_ok(&x)),
+        Ok( body @ ReturnValue::SumOfAAndB {..}) => Ok(reply_ok(&body)),
         _ => Ok(reply_internal_error())
     }
 }
