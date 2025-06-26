@@ -12,14 +12,6 @@ pub fn reply_ok<T: Serialize>(response: &T) -> WithStatus<Json> {
     )
 }
 
-pub fn reply_invalid_parameters() -> WithStatus<Json> {
-    error!("invalid parameter(s)");
-    warp::reply::with_status(
-        json(&serde_json::json!({"error": "invalid parameter(s)"})),
-        StatusCode::BAD_REQUEST
-    )
-}
-
 pub fn reply_forbidden_method() -> WithStatus<Json> {
     error!("method not allowed");
     warp::reply::with_status(

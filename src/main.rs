@@ -2,7 +2,7 @@ use std::net::{Ipv4Addr, SocketAddr};
 use dotenv::dotenv;
 use tracing_subscriber;
 use warp::Filter;
-use crate::utils::validator::json_body;
+use crate::utils::validator::{json_body, with_query};
 
 mod endpoints;
 mod handlers;
@@ -44,7 +44,7 @@ async fn main() {
     let add_get = warp::path!("add")
         .and(warp::path::end())
         .and(warp::get())
-        .and(warp::query::<endpoints::add::GetQueryParams>())
+        .and(with_query::<endpoints::add::GetQueryParams>())
         .and_then(endpoints::add::get)
         .boxed();
     let add = add_get;
@@ -53,7 +53,7 @@ async fn main() {
     let subtract_get = warp::path!("subtract")
         .and(warp::path::end())
         .and(warp::get())
-        .and(warp::query::<endpoints::subtract::GetQueryParams>())
+        .and(with_query::<endpoints::subtract::GetQueryParams>())
         .and_then(endpoints::subtract::get)
         .boxed();
     let subtract = subtract_get;

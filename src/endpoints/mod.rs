@@ -2,7 +2,8 @@ use serde_json::json;
 use warp::http::StatusCode;
 use warp::reject;
 use warp::reject::{InvalidQuery, MethodNotAllowed};
-use crate::utils::{reply_forbidden_method, reply_invalid_parameters, reply_notfound};
+use warp::reply::json;
+use crate::utils::{reply_forbidden_method, reply_notfound};
 
 pub(crate) mod add;
 pub(crate) mod subtract;
@@ -12,27 +13,45 @@ pub(crate) mod square;
 pub(crate) mod health;
 
 #[derive(Debug)]
-pub(crate) struct JsonBodyError {
+pub(crate) struct BodyInputError {
     pub(crate) message: String,
 }
 
-impl reject::Reject for JsonBodyError {}
+impl reject::Reject for BodyInputError {}
+
+#[derive(Debug)]
+pub(crate) struct QueryInputError {
+    pub(crate) message: String,
+}
+
+impl reject::Reject for QueryInputError {}
 
 pub async fn recover(err: warp::Rejection) -> Result<impl warp::Reply, warp::Rejection> {
     if err.is_not_found() {
         return Ok(reply_notfound());
     }
     
-    if let Some(_) = err.find::<InvalidQuery>() {
-        return Ok(reply_invalid_parameters());
+    if let Some(e) = err.find::<QueryInputError>() {
+        let json = warp::reply::json(&json!({
+            "error": "Invalid parameter(s)",
+            "details": e.message,
+        }));
+        return Ok(warp::reply::with_status(json, StatusCode::BAD_REQUEST));
     }
     
-    if let Some(e) = err.find::<JsonBodyError>() {
+    if let Some(e) = err.find::<BodyInputError>() {
         let json = warp::reply::json(&json!({
             "error": "Invalid request body",
             "details": e.message,
         }));
         return Ok(warp::reply::with_status(json, StatusCode::BAD_REQUEST));
+    }
+
+    if let Some(_) = err.find::<InvalidQuery>() {
+        return Ok(warp::reply::with_status(
+            json(&json!({"error": "missing parameter(s)"})),
+            StatusCode::BAD_REQUEST
+        ))
     }
 
     if let Some(_) = err.find::<MethodNotAllowed>() {
