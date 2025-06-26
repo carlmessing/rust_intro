@@ -36,15 +36,14 @@ pub(crate) async fn livez() -> Result<impl warp::Reply, warp::Rejection> {
 }
 
 /// infoz endpoint for retrieving certain information about the application
-pub(crate) async fn infoz() -> Result<impl warp::Reply, warp::Rejection> {
-    let info = json!({
-        "title": "Calculator API",
-        "version": "1.0.0",
-        "description": "A simple calculator with basic arithmetic operations.",
-    });
+pub(crate) async fn infoz(key: String) -> Result<impl warp::Reply, warp::Rejection> {
+    let info = match handlers::health::infoz(&key) { 
+        None => ("No information available".to_string(), StatusCode::NOT_FOUND),
+        x => (x.unwrap(), StatusCode::OK)
+    };
     
     Ok(warp::reply::with_status(
-        json(&info),
-        StatusCode::OK
+        json(&json!({&key: info.0})),
+        info.1
     ))
 }
