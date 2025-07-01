@@ -1,5 +1,6 @@
 use std::panic;
 use serde::Deserialize;
+use crate::endpoints::log_internal_error;
 use crate::handlers;
 use crate::utils::{reply_internal_error, reply_ok};
 use crate::handlers::adder::ReturnValue;
@@ -16,6 +17,9 @@ pub async fn get(params: GetQueryParams) -> Result<impl warp::Reply, warp::Rejec
     let result = panic::catch_unwind(|| {handlers::adder::handler(params)});
     match result {
         Ok(body @ ReturnValue::SumOfAAndB {..}) => Ok(reply_ok(&body)),
-        _ => Ok(reply_internal_error())
+        Err(err) => { 
+            log_internal_error(err);
+            Ok(reply_internal_error()) 
+        }
     }
 }

@@ -1,5 +1,6 @@
 use std::panic;
 use serde::Deserialize;
+use crate::endpoints::log_internal_error;
 use crate::handlers;
 use crate::handlers::subtractor::ReturnValue;
 use crate::utils::{reply_internal_error, reply_ok};
@@ -16,6 +17,9 @@ pub async fn get(params: GetQueryParams) -> Result<impl warp::Reply, warp::Rejec
     let result = panic::catch_unwind(|| {handlers::subtractor::handler(params)});
     match result {
         Ok(ReturnValue::ResultOfAB(x)) => Ok(reply_ok(&x)),
-        _ => Ok(reply_internal_error())
+        Err(err) => { 
+            log_internal_error(err);
+            Ok(reply_internal_error())
+        }
     }
 }

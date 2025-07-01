@@ -3,7 +3,7 @@ use warp::reply::json;
 use crate::handlers;
 
 /// kubernetes (health check) readyz endpoint;
-/// replies with 200 for ready and 500 for not ready
+/// replies with `200` for ready and `500` for not ready
 pub(crate) async fn readyz() -> Result<impl warp::Reply, warp::Rejection> {
     if handlers::health::readyz() {
         Ok(warp::reply::with_status(
@@ -19,7 +19,7 @@ pub(crate) async fn readyz() -> Result<impl warp::Reply, warp::Rejection> {
 }
 
 /// kubernetes (health check) livez endpoint;
-/// replies with 200 for ready and 500 for not ready
+/// replies with `200` for ready and `500` for not ready
 pub(crate) async fn livez() -> Result<impl warp::Reply, warp::Rejection> {
     if handlers::health::livez() {
         Ok(warp::reply::with_status(
@@ -34,7 +34,7 @@ pub(crate) async fn livez() -> Result<impl warp::Reply, warp::Rejection> {
     }
 }
 
-/// infoz endpoint for retrieving certain information about the application
+/// infoz endpoint for retrieving certain json-information about the application
 pub(crate) async fn infoz() -> Result<impl warp::Reply, warp::Rejection> {
     Ok(warp::reply::with_status(
         json(&handlers::health::infoz()),

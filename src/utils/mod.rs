@@ -28,7 +28,6 @@ pub fn reply_notfound() -> WithStatus<Json> {
 }
 
 pub fn reply_internal_error() -> WithStatus<Json> {
-    error!("internal error");
     warp::reply::with_status(
         json(&serde_json::json!({"error": "an internal error occured"})),
         StatusCode::INTERNAL_SERVER_ERROR

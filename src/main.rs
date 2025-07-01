@@ -1,4 +1,5 @@
 use std::net::{Ipv4Addr, SocketAddr};
+use std::panic;
 use dotenv::dotenv;
 use tracing_subscriber;
 use warp::Filter;
@@ -15,6 +16,13 @@ fn init_tracing() {
         .with_thread_names(true) // show thread names
         .with_env_filter("info") // log level (can be overridden with RUST_LOG)
         .init();
+}
+
+/// if set to `true`, no stacktrace is printed to `stdout` when the thread is panicking
+fn print_stacktrace(stacktrace_allowed: bool) {
+    if !stacktrace_allowed {
+        panic::set_hook(Box::new(|_info| { }));
+    }
 }
 
 /// retrieves the IP-Adress as a quadruple of the server from the `.env` file.
@@ -39,6 +47,7 @@ fn env_port() -> u16 {
 async fn main() {
     // init tracing
     init_tracing();
+    print_stacktrace(false);
     
     // add endpoint
     let add_get = warp::path!("add")

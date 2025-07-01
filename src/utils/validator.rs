@@ -3,6 +3,7 @@ use serde::de::DeserializeOwned;
 use warp::{Filter, Rejection};
 use crate::endpoints;
 
+/// creates a application/json `Filter` for a specific type that includes serde error descriptions when rejecting
 pub fn json_body<T>() -> impl Filter<Extract = (T,), Error = Rejection> + Clone
 where
     T: DeserializeOwned + Send + 'static,
@@ -18,6 +19,7 @@ where
     })
 }
 
+/// creates a HTTP-parameter `Filter` for a specific type that includes serde error descriptions when rejecting
 pub fn with_query<T>() -> impl Filter<Extract = (T,), Error = Rejection> + Clone
 where
     T: DeserializeOwned + Send + 'static,

@@ -3,6 +3,8 @@ use warp::http::StatusCode;
 use warp::reject;
 use warp::reject::{InvalidQuery, MethodNotAllowed};
 use warp::reply::json;
+use std::any::Any;
+use log::error;
 use crate::utils::{reply_forbidden_method, reply_notfound};
 
 pub(crate) mod add;
@@ -65,4 +67,15 @@ pub async fn recover(err: warp::Rejection) -> Result<impl warp::Reply, warp::Rej
         })),
         StatusCode::INTERNAL_SERVER_ERROR,
     ))
+}
+
+pub fn log_internal_error(err: Box<dyn Any + Send>) {
+    let message = "and unhandled internal error occured";
+    if let Some(s) = err.downcast_ref::<&'static str>() {
+        error!("{}: {}", message, s);
+    } else if let Some(s) = err.downcast_ref::<String>() {
+        error!("{}: {}", message, s);
+    } else {
+        error!("{}", message);
+    }
 }

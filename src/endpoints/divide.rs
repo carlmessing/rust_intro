@@ -2,6 +2,7 @@ use std::panic;
 use warp::http::StatusCode;
 use warp::reply::json;
 use crate::{handlers};
+use crate::endpoints::log_internal_error;
 use crate::handlers::divider::ReturnValue;
 use crate::schemas::component_types::{Operands};
 use crate::utils::{reply_internal_error, reply_ok};
@@ -16,6 +17,9 @@ pub async fn post(body: Operands) -> Result<impl warp::Reply, warp::Rejection> {
             json(&x),
             StatusCode::BAD_REQUEST
         )),
-        _ => Ok(reply_internal_error())
+        Err(err) => { 
+            log_internal_error(err);
+            Ok(reply_internal_error())
+        }
     }
 }
