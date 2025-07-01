@@ -101,7 +101,12 @@ async fn main() {
         .and_then(endpoints::health::infoz)
         .boxed();
     let healthcheck = livez.or(readyz).or(infoz);
-    let none = warp::path!("this exists only because this allows us to be lazy with the gtmpl templates").and(warp::any()).map(|| "This should not happen at any time");
+
+    let swagger_doc = warp::path("docs")
+        .and(warp::fs::dir("web/swagger-ui-5.25.2/dist"))
+        .boxed();
+
+        let none = warp::path!("this exists only because this allows us to be lazy with the gtmpl templates").and(warp::any()).map(|| "This should not happen at any time");
     // Define routes
     let routes = none
         .or(add)
@@ -110,6 +115,7 @@ async fn main() {
         .or(divide)
         .or(square)
         .or(healthcheck)
+        .or(swagger_doc)
         .boxed()
         .recover(endpoints::recover)
         .with(warp::log("api"));
