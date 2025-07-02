@@ -1,4 +1,3 @@
-use std::fmt::Debug;
 use std::panic;
 use crate::{endpoints, handlers};
 use crate::handlers::squarer::ReturnValue;

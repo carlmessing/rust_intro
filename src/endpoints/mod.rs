@@ -13,6 +13,7 @@ pub(crate) mod multiply;
 pub(crate) mod divide;
 pub(crate) mod square;
 pub(crate) mod health;
+pub(crate) mod oas;
 
 #[derive(Debug)]
 pub(crate) struct BodyInputError {

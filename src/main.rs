@@ -1,9 +1,8 @@
-use std::net::{Ipv4Addr, SocketAddr};
-use std::panic;
+use std::net::SocketAddr;
 use dotenv::dotenv;
 use tracing_subscriber;
-use warp::Filter;
-use crate::utils::validator::{json_body, with_query};
+use utils::environment;
+use crate::endpoints::oas;
 
 mod endpoints;
 mod handlers;
@@ -18,123 +17,13 @@ fn init_tracing() {
         .init();
 }
 
-/// if set to `true`, no stacktrace is printed to `stdout` when the thread is panicking
-fn print_stacktrace(stacktrace_allowed: bool) {
-    if !stacktrace_allowed {
-        panic::set_hook(Box::new(|_info| { }));
-    }
-}
-
-/// retrieves the IP-Adress as a quadruple of the server from the `.env` file.
-/// Defaults to [127.0.0.1](http://127.0.0.1) (localhost/loopback) if not set.
-fn env_ip() -> [u8; 4] {
-    let ip_str = std::env::var("SERVER_IP").unwrap_or_else(|_| "127.0.0.1".to_string());
-    let ip: Ipv4Addr = ip_str.parse().unwrap_or_else(|_| { Ipv4Addr::new(127, 0, 0, 1) });
-    ip.octets()
-}
-
-/// retrieves the IP-Adress as a quadruple of the server from the `.env` file.
-/// Defaults to `3030` (default warp port) if not set.
-fn env_port() -> u16 {
-    let server_port: i32 = std::env::var("SERVER_PORT")
-        .ok()
-        .and_then(|val| val.parse::<i32>().ok())
-        .unwrap_or(3030);
-    server_port as u16
-}
-
 #[tokio::main]
 async fn main() {
-    // init tracing
-    init_tracing();
-    print_stacktrace(false);
-    
-    // add endpoint
-    let add_get = warp::path!("add")
-        .and(warp::path::end())
-        .and(warp::get())
-        .and(with_query::<endpoints::add::GetQueryParams>())
-        .and_then(endpoints::add::get)
-        .boxed();
-    let add = add_get;
-    
-    // subtract endpoint
-    let subtract_get = warp::path!("subtract")
-        .and(warp::path::end())
-        .and(warp::get())
-        .and(with_query::<endpoints::subtract::GetQueryParams>())
-        .and_then(endpoints::subtract::get)
-        .boxed();
-    let subtract = subtract_get;
-    
-    // multiply endpoint
-    let multiply_post = warp::path!("multiply")
-        .and(warp::path::end())
-        .and(warp::post())
-        .and(json_body::<schemas::component_types::Operands>())
-        .and_then(endpoints::multiply::post)
-        .boxed();
-    let multiply = multiply_post;
-    
-    // divide endpoint
-    let divide_post = warp::path!("divide")
-        .and(warp::path::end())
-        .and(warp::post())
-        .and(json_body::<schemas::component_types::Operands>())
-        .and_then(endpoints::divide::post)
-        .boxed();
-    let divide = divide_post;
-    
-    // square endpoint
-    let square_get = warp::path!("square" / i32)
-        .and(warp::path::end())
-        .and(warp::get())
-        .and_then(endpoints::square::get)
-        .boxed();
-    let square = square_get;
-    
-    // kubernetes health check endpoints
-    let livez = warp::path!("healthcheck" / "livez")
-        .and(warp::path::end())
-        .and(warp::get())
-        .and_then(endpoints::health::livez)
-        .boxed();
-    let readyz = warp::path!("healthcheck" / "readyz")
-        .and(warp::path::end())
-        .and(warp::get())
-        .and_then(endpoints::health::readyz)
-        .boxed();
-    let infoz = warp::path!("infoz")
-        .and(warp::path::end())
-        .and(warp::get())
-        .and_then(endpoints::health::infoz)
-        .boxed();
-    let healthcheck = livez.or(readyz).or(infoz);
-
-    let swagger_doc = warp::path("docs")
-        .and(warp::fs::dir("web/swagger-ui-5.25.2/dist"))
-        .boxed();
-
-        let none = warp::path!("this exists only because this allows us to be lazy with the gtmpl templates").and(warp::any()).map(|| "This should not happen at any time");
-    // Define routes
-    let routes = none
-        .or(add)
-        .or(subtract)
-        .or(multiply)
-        .or(divide)
-        .or(square)
-        .or(healthcheck)
-        .or(swagger_doc)
-        .boxed()
-        .recover(endpoints::recover)
-        .with(warp::log("api"));
-
     // Start server
     dotenv().ok();
-    let ip = env_ip();
-    let port = env_port();
-    println!("✅ Server is running on {}.{}.{}.{}:{}.", ip[0], ip[1], ip[2], ip[3], port);
-    warp::serve(routes)
+    let ip = environment::ip();
+    let port = environment::port();
+    warp::serve(oas::routes())
         .run(SocketAddr::from((ip, port)))
         .await;
 }

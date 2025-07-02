@@ -4,6 +4,7 @@ use serde::Serialize;
 use log::error;
 
 pub mod validator;
+pub(crate) mod environment;
 
 pub fn reply_ok<T: Serialize>(response: &T) -> WithStatus<Json> {
     warp::reply::with_status(
