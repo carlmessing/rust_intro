@@ -19,6 +19,9 @@ fn init_tracing() {
 
 #[tokio::main]
 async fn main() {
+    init_tracing();
+    environment::print_stacktrace(false);
+
     // Start server
     dotenv().ok();
     let ip = environment::ip();

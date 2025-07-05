@@ -115,6 +115,8 @@ paths:
 
   /healthcheck/readyz:
     get:
+      tags:
+        - builtin
       operationId: kubernetes_readyz
       summary: returns information about the ready state of the application
       responses:
@@ -125,6 +127,8 @@ paths:
 
   /healthcheck/livez:
     get:
+      tags:
+        - builtin
       operationId: kubernetes_livez
       summary: returns information about the alive state of the application
       responses:
@@ -135,6 +139,8 @@ paths:
           
   /infoz:
     get:
+      tags:
+        - builtin
       operationId: retrieve_informationz
       summary: get certain informations about application like the version
       responses: 

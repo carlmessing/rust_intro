@@ -1,13 +1,8 @@
 use warp::{Filter, Reply, Rejection};
-use crate::{endpoints, init_tracing, schemas};
-use crate::utils::environment;
+use crate::{endpoints, schemas};
 use crate::utils::validator::{json_body, with_query};
 
 pub fn routes() -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
-    // init tracing
-    init_tracing();
-    environment::print_stacktrace(false);
-
     // add endpoint
     let add_get = warp::path!("add")
         .and(warp::path::end())
@@ -87,6 +82,6 @@ pub fn routes() -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone 
         .boxed()
         .recover(endpoints::recover)
         .with(warp::log("api"));
-    
+
     routes
 }
