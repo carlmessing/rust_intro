@@ -4,7 +4,7 @@ use warp::reject;
 use warp::reject::{InvalidQuery, MethodNotAllowed};
 use warp::reply::json;
 use std::any::Any;
-use log::error;
+use tracing::error; // changed from log::error to tracing::error
 use crate::utils::{reply_forbidden_method, reply_notfound};
 
 pub(crate) mod add;
@@ -31,10 +31,12 @@ impl reject::Reject for QueryInputError {}
 
 pub async fn recover(err: warp::Rejection) -> Result<impl warp::Reply, warp::Rejection> {
     if err.is_not_found() {
+        error!("Route not found: {:?}", err);
         return Ok(reply_notfound());
     }
     
     if let Some(e) = err.find::<QueryInputError>() {
+        error!("Invalid query parameters: {}", e.message);
         let json = warp::reply::json(&json!({
             "error": "Invalid parameter(s)",
             "details": e.message,
@@ -43,6 +45,7 @@ pub async fn recover(err: warp::Rejection) -> Result<impl warp::Reply, warp::Rej
     }
     
     if let Some(e) = err.find::<BodyInputError>() {
+        error!("Invalid request body: {}", e.message);
         let json = warp::reply::json(&json!({
             "error": "Invalid request body",
             "details": e.message,
@@ -51,6 +54,7 @@ pub async fn recover(err: warp::Rejection) -> Result<impl warp::Reply, warp::Rej
     }
 
     if let Some(_) = err.find::<InvalidQuery>() {
+        error!("Missing query parameter(s): {:?}", err);
         return Ok(warp::reply::with_status(
             json(&json!({"error": "missing parameter(s)"})),
             StatusCode::BAD_REQUEST
@@ -58,10 +62,12 @@ pub async fn recover(err: warp::Rejection) -> Result<impl warp::Reply, warp::Rej
     }
 
     if let Some(_) = err.find::<MethodNotAllowed>() {
+        error!("Method not allowed: {:?}", err);
         return Ok(reply_forbidden_method());
     }
 
     // fallback error
+    error!("Unhandled rejection: {:?}", err);
     Ok(warp::reply::with_status(
         warp::reply::json(&json!({
             "error": "Unhandled rejection"
@@ -71,7 +77,7 @@ pub async fn recover(err: warp::Rejection) -> Result<impl warp::Reply, warp::Rej
 }
 
 pub fn log_internal_error(err: Box<dyn Any + Send>) {
-    let message = "and unhandled internal error occured";
+    let message = "An unhandled internal error occurred";
     if let Some(s) = err.downcast_ref::<&'static str>() {
         error!("{}: {}", message, s);
     } else if let Some(s) = err.downcast_ref::<String>() {

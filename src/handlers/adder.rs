@@ -4,6 +4,7 @@ use crate::endpoints::add::GetQueryParams;
 /// Contains the return value for the `GET /add` handler.
 #[derive(Serialize)]
 #[serde(untagged)]
+#[derive(Debug)]
 pub enum ReturnValue {
     SumOfAAndB {result: f64} // 200 response
 }
